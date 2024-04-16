@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html>
+ <head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+ <title>demo</title>
+ <script src="http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js"></script>
+ <style type="text/css">
+ *{
+             padding: 0;
+             margin: 0;
+             list-style: none;
+          }
+          body{
+
+             position: relative;
+          }
+         .banner1{
+             display: block;
+             width: 100%;
+             height: auto;
+             overflow: hidden;
+            visibility: hidden;
+          }
+         .ggl{
+             position: relative;
+             width: 85.6%;
+             height: 90px;
+             margin: 15px auto;
+             background:  no-repeat center center;
+             background-size: 100% 100%;
+          }
+          .canvas{
+            position:absolute;
+            top:2px;
+            left:2.5%;
+            width:95%;
+            height:82px;
+            line-height:82px;
+            text-align:center;
+            z-index: 2;
+
+         }
+         .info{
+            position:absolute;
+            top:2px;
+            left:2.5%;
+            width:95%;
+            height:82px;
+            text-align:center;
+         }
+         .info span{
+            display: block;
+            font-size: 18px;
+         }
+         #prompt{
+            line-height: 80px;
+             font-size:2rem;
+            background-clip: border-box;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: #FF512F;
+            font-weight: 700;
+            text-shadow: 0px 0px 7px #ffd800;
+            background-image: linear-gradient(90deg, #ffd800 0%, #ff512f 100%, #fff);
+            animation: glow-animation 7s infinite linear;
+            color: #FFC0CB;
+            box-sizing: border-box;
+            vertical-align: inherit;
+            text-align: center;
+         }
+        @keyframes glow-animation{
+            0%{filter:hue-rotate(-360deg)}
+            100%{filter:hue-rotate(360deg)}
+        }
+         .btn{
+            position: relative;
+            width: 50%;
+            height: 35px;
+            text-align: center;
+            line-height: 35px;
+            background: #df412b;
+            color: #fff;
+            border-radius: 5px;
+            margin: 0 auto;
+            z-index: 1;
+         }
+         .guize{
+            display: block;
+            width: 85.6%;
+            height: auto;
+            margin: 5% auto 10% auto;
+            border-radius: 5px;
+         }
+         .num{
+            width: 100%;
+            height: 30px;
+            line-height: 30px;
+            text-align: center;
+            font-size:14px;
+            margin-top: 5%;
+         }
+         #ok, #no{display: none;}
+         .pop{
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 3;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: none;
+         }
+         .pop img{
+            width: 100%;
+            height: auto;
+            overflow: hidden;
+            margin: 15% auto;
+         }
+       </style>
+ </head>
+ <body>
+
+ <div class="ggl" id="top">
+ <div class="info" id="prize">
+ <span id="prompt"></span>
+ <span  id="ok"></span>
+ </div>
+ <canvas id="c1" class="canvas"></canvas>
+ </div>
+
+  <span class="btn" id="no">再来一次</span>
+
+ <div class="pop pop1">
+<!--  <img src="img/pop1.png" /> -->
+ </div>
+ <div class="pop pop2">
+<!--  <img src="img/pop2.png" id="pop2" /> -->
+ </div>
+ <script>
+
+ var initialize = function () {
+
+//随机数
+function getRandomNum(lbound, ubound) {
+    return (Math.floor(Math.random() * (ubound - lbound)) + lbound);
+}
+var r = getRandomNum(1,100);
+var btn = document.getElementsByClassName("btn");
+for(var i=0; i<btn.length; i++){
+   btn[i].style.zIndex = '1';
+}
+document.getElementById("no").style.display = "block";
+document.getElementById("ok").style.display = "none";
+
+function Draw(prizes) {
+    var prizeList = [] //按照权重分解后的奖品数组
+    prizes.map(function(item) {
+        prizeList.push({
+            name : item.name,
+            value : item.key
+        })
+        for (var i = 0; i < item.probability; i++) {
+            prizeList.push({
+                name : item.name,
+                value : item.key
+            })
+        }
+    });
+    prizeList = reset(prizeList);
+    // 范围随机数
+    function randomFrom(lowerValue, upperValue) {
+        return Math.floor(Math.random() * (upperValue - lowerValue + 1)
+                + lowerValue);
+    }
+    ;
+    // 随机打乱数组
+    function reset(arr) {
+        var eachArr = arr.concat([])
+        var lastArr = []
+        function deepEach(deepArr) {
+            if (deepArr.length) {
+                var randomIndex = randomFrom(0, eachArr.length - 1)
+                lastArr.push(eachArr[randomIndex])
+                eachArr.splice(randomIndex, 1)
+                deepEach(eachArr)
+            }
+        }
+        deepEach(eachArr)
+        return lastArr
+    }
+    this.getResult = function() {
+        var random = randomFrom(0, prizeList.length - 1);
+        return prizeList[random]
+    }
+}
+
+// 奖项和概率数据结构，probability 为中奖概率，可以根据实际需求修改
+var model = [ {
+    name : '一等奖',
+    key : '去洛阳！',
+    probability : 33,
+}, {
+    name : '二等奖',
+    key : '去山东',
+    probability : 33,
+}, {
+    name : '三等奖',
+    key : '哪都不去,宅在家里！',
+    probability : 33,
+} ]
+
+var draw = new Draw(model);
+drawResult = draw.getResult();
+
+
+//初始化涂抹面积
+isOk = 0;
+document.getElementById("prompt").innerHTML=drawResult.value;
+ };
+
+ var c1;             //画布
+ var ctx;         //画笔
+ var ismousedown;   //标志用户是否按下鼠标或开始触摸
+ var isOk=0;          //标志用户是否已经刮开了一半以上
+ var fontem = parseInt(window.getComputedStyle(document.documentElement, null)["font-size"]);//这是为了不同分辨率上配合@media自动调节刮的宽度
+
+ /* 页面加载后开始初始化画布 */
+window.onload = function(){
+    initialize();
+    c1 = document.getElementById("c1");
+     //这里很关键，canvas自带两个属性width、height,我理解为画布的分辨率，跟style中的width、height意义不同。
+     //最好设置成跟画布在页面中的实际大小一样
+     //不然canvas中的坐标跟鼠标的坐标无法匹配
+    c1.width=c1.clientWidth;
+    c1.height=c1.clientHeight;
+    ctx = c1.getContext("2d");
+
+    //PC端的处理
+    c1.addEventListener("mousemove",eventMove,false);
+    c1.addEventListener("mousedown",eventDown,false);
+    c1.addEventListener("mouseup",eventUp,false);
+    //移动端的处理
+    c1.addEventListener('touchstart', eventDown,false);
+    c1.addEventListener('touchend', eventUp,false);
+    c1.addEventListener('touchmove', eventMove,false);
+    //初始化
+    initCanvas();
+}
+//初始化画布，画灰色的矩形铺满
+function initCanvas(){
+    //网上的做法是给canvas设置一张背景图片，我这里的做法是直接在canvas下面另外放了个div。
+    //c1.style.backgroundImage="url(中奖图片.jpg)";
+    ctx.globalCompositeOperation = "source-over";
+            ctx.fillStyle = '#aaaaaa';
+            ctx.fillRect(0,0,c1.clientWidth,c1.clientHeight);
+            ctx.fill();
+            ctx.font = "Bold 30px Arial";
+            ctx.textAlign = "center";
+            ctx.fillStyle = "#999999";
+            ctx.fillText("刮刮乐",c1.width/2,50);
+            //把这个属性设为这个就可以做出圆形橡皮擦的效果
+            //有些老的手机自带浏览器不支持destination-out,下面的代码中有修复的方法
+            ctx.globalCompositeOperation = 'destination-out';
+         }
+//鼠标按下 和 触摸开始
+function eventDown(e){
+    e.preventDefault();
+    ismousedown=true;
+}
+
+//鼠标抬起 和 触摸结束
+function eventUp(e){
+    e.preventDefault();
+
+    //得到canvas的全部数据
+    var a = ctx.getImageData(0,0,c1.width,c1.height);
+    var j=0;
+    for(var i=3;i<a.data.length;i+=4){
+          if(a.data[i]==0)j++;
+    }
+
+    //当被刮开的区域等于一半时，则可以开始处理结果
+    if(j>=a.data.length/8){
+       isOk = 1;
+    }
+    ismousedown=false;
+}
+
+//鼠标移动 和 触摸移动
+function eventMove(e){
+             e.preventDefault();
+            if(ismousedown) {
+                if(e.changedTouches){
+                   e=e.changedTouches[e.changedTouches.length-1];
+                }
+            var topY = document.getElementById("top").offsetTop;
+            var oX = c1.offsetLeft,
+                oY = c1.offsetTop+topY;
+
+            var x = (e.clientX + document.body.scrollLeft || e.pageX) - oX || 0,
+               y = (e.clientY + document.body.scrollTop || e.pageY) - oY || 0;
+               //画360度的弧线，就是一个圆，因为设置了ctx.globalCompositeOperation = 'destination-out';
+            //画出来是透明的
+            ctx.beginPath();
+            ctx.arc(x, y, fontem*1.2, 0, Math.PI * 2,true);
+            c1.style.display = 'none';
+                c1.offsetHeight;
+                c1.style.display = 'inherit';
+
+                ctx.fill();
+            }
+
+
+            if(isOk){
+               var btn = document.getElementsByClassName("btn");
+               for(var i=0; i<btn.length; i++){
+                  btn[i].style.zIndex = '3';
+               }
+               document.getElementsByClassName("btn")[0].style.zIndex="3";
+            }
+         }
+    var btn = document.getElementById("no");
+    btn.addEventListener('click',function() {
+    //初始化按钮
+    document.getElementById("no").style.display = "none";
+    document.getElementById("ok").style.display = "none";
+    window.onload();
+    initCanvas();
+});
+</script>
+ </body>
+</html>
